@@ -3,19 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <title>Country Guesser Game</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"> </link>
+    <style>
+        body {
+            display: flex;
+            margin: 0;
+            font-family: Arial;
+        }
+
+        #map {
+            height: 100vh;
+            width: 70%;
+        }
+
+        #panel {
+            width: 30%;
+            padding: 20px;
+            background-color: #f8f9fa;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1)
+        }
+
+        #result {
+            margin-top: 10px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
-    <h1>Country Guesser</h1>
+    <div id="map"></div>
+    <div id="panel">
+        <h1>Country Guesser</h1>
+        <form id="guessForm" onsubmit="submitGuess(event)">
+            <label for="country">Guess a country:</label>
+            <input type="text" id="country" name="country" required>
+            <button type="submit">Submit</button>
+        </form>
+        <p id="result"></p>
+    </div>
 
-    <form id="guessForm" method="POST" onsubmit="submitGuess(event)">
-        <label for="country">Guess a country:</label>
-        <input type="text" id="country" name="country" required>
-        <button type="submit">Submit</button>
-    </form>
-    <p id="result"></p>
-
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="/static/CountryGuessScript.js"></script>
+
+    <script>
+        const map = L.map('map').setView([20,0], 2);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map)
+    </script>
 </body>
 </html>
