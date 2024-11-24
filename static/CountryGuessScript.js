@@ -1,5 +1,8 @@
 let defaultLayer, highlightLayer;
 
+let numCorrectGuesses = 0;
+let numOfCountries;
+
 const defaultStyle = {
     color: "#3388ff",
     weight: 1,
@@ -8,6 +11,7 @@ const defaultStyle = {
 
 const highlightStyle = {
     color: "#FF0000",
+    fillColor: "FF0000",
     weight: 1,
     fillOpacity: 0.5,
 };
@@ -37,6 +41,8 @@ fetch('/static/data/countries.json')
         highlightLayer = L.geoJSON(null, {
             style: highlightLayer,
         }).addTo(map);
+
+        numOfCountries = Object.keys(defaultLayer._layers).length;
     })
 
 function submitGuess(event) {
@@ -46,17 +52,21 @@ function submitGuess(event) {
 
     console.log(guessedCountry)
 
+
     defaultLayer.eachLayer(layer => {
         const countryName = layer.feature.properties.NAME;
 
         if (countryName.toLowerCase() == guessedCountry) {
+            numCorrectGuesses++;
+            // Add the correctly guessed country to the highlighted layer
+            highlightLayer.addData(layer.toGeoJSON());
             
-            highlightLayer.addData(layer.feature);
-
             defaultLayer.removeLayer(layer);
 
-            document.getElementById('result').innerText = `Correct! you  guessed ${countryName}`;
-            console.log(document.getElementById('result').innerText);        
+            document.getElementById('result').innerText = `Correct! you  guessed ${numCorrectGuesses} / ${numOfCountries}`;
+            console.log(document.getElementById('result').innerText);   
+            
+            document.getElementById('country').value = "";
         }
     });
 }
