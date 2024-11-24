@@ -1,11 +1,4 @@
-const map = L.map('map').setView([20,0],2);
-
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 18,
-    attribution: '© OpenStreetMap contributors',
-}).addTo(map)
-
-let geojson;
+let defaultLayer, highlightLayer;
 
 const defaultStyle = {
     color: "#3388ff",
@@ -14,10 +7,17 @@ const defaultStyle = {
 };
 
 const highlightStyle = {
-    color: "#ff0000",
+    color: "#FF0000",
     weight: 1,
     fillOpacity: 0.5,
 };
+
+const map = L.map('map').setView([20,0],2);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+    attribution: '© OpenStreetMap contributors',
+}).addTo(map)
 
 function onEachCountry(feature, layer) {
     layer.on({
@@ -26,38 +26,37 @@ function onEachCountry(feature, layer) {
     });
 }
 
-if ('/static/data/countries.json') {
-    fetch('/static/data/countries.json')
-        .then(response => response.json())
-        .then(data => {
-            console.log(data)
-            geojson = L.geoJSON(data, {
-                style: defaultStyle,
+fetch('/static/data/countries.json')
+    .then(response => response.json())
+    .then(data => {
+        defaultLayer = L.geoJSON(data, {
+            style: defaultStyle,
+            onEachFeature: onEachCountry,
+        }).addTo(map);
 
-                onEachFeature: onEachCountry,
-            }).addTo(map);
-        });
-    }
-else {
-    console.log("Did not find json file.")
-}
+        highlightLayer = L.geoJSON(null, {
+            style: highlightLayer,
+        }).addTo(map);
+    })
 
 function submitGuess(event) {
     event.preventDefault();
 
-    const guessedCountry = document.getElementById('country').value;
+    const guessedCountry = document.getElementById('country').value.toLowerCase();
 
     console.log(guessedCountry)
 
-    geojson.eachLayer(layer => {
-        const countryName = layer.feature.properties.NAME.toLowerCase();
+    defaultLayer.eachLayer(layer => {
+        const countryName = layer.feature.properties.NAME;
 
-        if (countryName == guessedCountry) {
-            layer.setStyle(highlightStyle);
-            document.getElementById('result').innerText = 'Correct! you  guessed ${countryName}';
-            console.log(document.getElementById('result').innerText);        }
-        else {
-            layer.setStyle(defaultStyle);
+        if (countryName.toLowerCase() == guessedCountry) {
+            
+            highlightLayer.addData(layer.feature);
+
+            defaultLayer.removeLayer(layer);
+
+            document.getElementById('result').innerText = `Correct! you  guessed ${countryName}`;
+            console.log(document.getElementById('result').innerText);        
         }
     });
 }
